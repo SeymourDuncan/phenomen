@@ -4,9 +4,32 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:phenomen"
+        xmlns:chartingToolkit="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="35*"/>
+            <RowDefinition Height="238*"/>
+            <RowDefinition Height="47*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+
+        <Button Grid.Column="1" Margin="25.4,3,24.8,0.2" Content="Загрузить файл"></Button>
+        <chartingToolkit:Chart Grid.Column="0" Grid.Row="1" Margin="30,0,30.4,0" Title="Chart Title" Grid.ColumnSpan="3">
+            <chartingToolkit:Chart.DataContext>
+                <PointCollection>1,10 2,20 3,30 4,40</PointCollection>
+            </chartingToolkit:Chart.DataContext>
+            <chartingToolkit:ColumnSeries DependentValuePath="X" IndependentValuePath="Y" ItemsSource="{Binding}"/>
+        </chartingToolkit:Chart>
+        <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="3" Margin="10,0,0,0">
+            <Label Content="Группа заболеваний"></Label>
+            <TextBlock></TextBlock>
+        </StackPanel>
+
     </Grid>
 </Window>

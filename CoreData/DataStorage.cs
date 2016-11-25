@@ -111,7 +111,7 @@ namespace CoreData
             BestC = 0.0;
 
             //CurveFunctions.FindGoodFit(spmVals, out BestA, out BestB, out BestC, 10, 100);
-            var f = new DoubleParameterizedDelegate(AnalysisFunctions.ThreeParameterExponential);
+            //var f = new DoubleParameterizedDelegate(AnalysisFunctions.ThreeParameterExponential);
             q = BestB;
             return true;
         }
