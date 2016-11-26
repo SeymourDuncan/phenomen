@@ -19,8 +19,8 @@
             <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
 
-        <Button Grid.Column="1" Margin="25.4,3,24.8,0.2" Content="Загрузить файл"></Button>
-        <chartingToolkit:Chart Grid.Column="0" Grid.Row="1" Margin="30,0,30.4,0" Title="Chart Title" Grid.ColumnSpan="3">
+        <Button Grid.Column="1" Margin="25.4,3,24.8,0.2" Content="Загрузить файл" Click="Button_Click"></Button>
+        <chartingToolkit:Chart x:Name="cchart" Grid.Column="0" Grid.Row="1" Margin="30,0,30.4,0" Title="Chart Title" Grid.ColumnSpan="3">
             <chartingToolkit:Chart.DataContext>
                 <PointCollection>1,10 2,20 3,30 4,40</PointCollection>
             </chartingToolkit:Chart.DataContext>
