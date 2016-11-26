@@ -79,7 +79,7 @@ namespace CoreData
                     for (var j = 1; j <= 3; ++j)
                     {
                         cnt++;
-                        list.Add(new NodeData(cnt, 0, 0, (DeseaseType)i, (ParamType)j));
+                        list.Add(new NodeData(cnt, double.MaxValue, double.MinValue, (DeseaseType)i, (ParamType)j));
                     }
                 }
             }
