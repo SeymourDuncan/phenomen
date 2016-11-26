@@ -56,7 +56,7 @@ namespace CoreData
         }
 
         public List<NodeData> NodeData { get; set; } = new List<NodeData>();
-        List<Point> spmVals = new List<Point>();
+        public List<Point> SpmVals { get; set; }= new List<Point>();
 
         double q = 0;
         double tc = 0;
@@ -90,7 +90,7 @@ namespace CoreData
                 return DeseaseType.dtUnknown;
 
             // вернем рассчетную функцию (экспоненциальную)
-            foreach (var pt in spmVals)
+            foreach (var pt in SpmVals)
             {
                 double Kr = BestC + BestA * Math.Exp(BestB * pt.X);
                 Kcalc.Add(pt.X, Kr);
@@ -184,7 +184,7 @@ namespace CoreData
 
             var lvect = new DoubleVector();
             var kvect = new DoubleVector();
-            foreach (var pt in spmVals)
+            foreach (var pt in SpmVals)
             {
                 lvect.Append(pt.X);
                 kvect.Append(pt.Y);
@@ -201,7 +201,7 @@ namespace CoreData
         {
             tc = 0;
             
-            foreach (var pt in spmVals)
+            foreach (var pt in SpmVals)
             {
                 double l = pt.X;
                 double Ke = pt.Y;
@@ -218,10 +218,10 @@ namespace CoreData
         private bool CalcISO()
         {
             iso = 0;
-            for (var i=0; i < spmVals.Count - 1; ++i)
+            for (var i=0; i < SpmVals.Count - 1; ++i)
             {
-                var p1 = spmVals[i];
-                var p2 = spmVals[i + 1];
+                var p1 = SpmVals[i];
+                var p2 = SpmVals[i + 1];
 
                 var h = p2.X - p1.X;
                 var S = (p1.Y + p2.Y)*h/2;
@@ -232,7 +232,7 @@ namespace CoreData
 
         public bool LoadDataFromCsv(string filename, bool doReadDesease = true)
         {
-            spmVals.Clear();
+            SpmVals.Clear();
             using (var reader = new StreamReader(File.OpenRead(filename)))
             {
                 // болезнь
@@ -252,7 +252,7 @@ namespace CoreData
                     double[] doubles;
                     bool valid = TryConvertToDoubleArr(values, out doubles);
                     if (valid)
-                        spmVals.Add(new Point(doubles[0], doubles[1]));
+                        SpmVals.Add(new Point(doubles[0], doubles[1]));
                 }                
             }            
             return true;

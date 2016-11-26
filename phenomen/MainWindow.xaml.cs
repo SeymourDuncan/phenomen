@@ -26,9 +26,14 @@ namespace phenomen
             InitializeComponent();
         }
 
+        Dictionary<double, double> Kcalc = new Dictionary<double, double>();
+        List<Point> Kreal;
+        DeseaseType Desease;
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             List<NodeData> resultList = new List<CoreData.NodeData>();
+            
 
             var dataStorage = new DataStorage();
             if (!dataStorage.Init())
@@ -46,7 +51,11 @@ namespace phenomen
             {
                 // Open document
                 string filename = dlg.FileName;
-                resultList = dataStorage.HandleCsvRet(filename);
+                //resultList = dataStorage.HandleCsvRet(filename);
+                Kcalc.Clear();
+                // всё что нужно получаем тут
+                Desease = dataStorage.AnalyzeFile(filename, Kcalc);
+                Kreal = dataStorage.SpmVals;
 
                 cchart.DataContext = resultList;
             }
