@@ -70,6 +70,19 @@ namespace CoreData
             SqliteWorker.SaveToJson(NodeData);
         }
 
+        public List<NodeData> HandleCsvRet(string filename)
+        {
+            List<NodeData> resultList = new List<CoreData.NodeData>();
+            if (!LoadDataFromCsv(filename))
+                return resultList;
+
+            if (!CalculateParams())
+                return resultList;
+
+            ResizeBounds();
+            return NodeData;
+        }
+
         void ResizeBounds()
         {
             var node = NodeData.FirstOrDefault(obj => (obj.DesType == currentDes) && (obj.ParamType == ParamType.ptISO));
