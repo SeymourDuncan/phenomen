@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using CenterSpace.NMath.Analysis;
+using CenterSpace.NMath.Core;
 
 namespace CoreData
 {
     public enum DeseaseType
     {
+        dtUnknown = 0,
         dtCiroz = 1,
         dtPochki = 2,
         dtReanimation = 3,
@@ -36,6 +39,11 @@ namespace CoreData
         public double Low;
         public DeseaseType DesType;
         public ParamType ParamType;
+
+        public double GetAverage()
+        {
+            return ((High + Low)/2);
+        }
     }
 
     public class DataStorage
@@ -68,6 +76,67 @@ namespace CoreData
 
             ResizeBounds();
             SqliteWorker.SaveToJson(NodeData);
+        }
+
+
+        public DeseaseType AnalyzeFile(string filename, Dictionary<double, double> Kcalc)
+        {
+            // загружаем
+            if (!LoadDataFromCsv(filename, false))
+                return DeseaseType.dtUnknown;
+
+            // считаем
+            if (!CalculateParams())
+                return DeseaseType.dtUnknown;
+
+            // вернем рассчетную функцию (экспоненциальную)
+            foreach (var pt in spmVals)
+            {
+                double Kr = BestC + BestA * Math.Exp(BestB * pt.X);
+                Kcalc.Add(pt.X, Kr);
+            }
+
+            // Анализируем
+
+            // хранит индексы болезни по каждому параметру
+            int[] desIndexes = new int[3];
+            for (int i=1; i<=3; ++i)
+            {
+                // формируем оценку по каждому отдельному параметру
+                var nodesByDes = NodeData.Where(obj => (obj.ParamType == (ParamType)i));
+                double param = 0.0;
+                switch ((ParamType)i)
+                {
+                    case ParamType.ptISO:
+                        param = iso;
+                        break;
+                    case ParamType.ptQ:
+                        param = q;
+                        break;
+                    case ParamType.ptTC:
+                        param = tc;
+                        break;
+                }
+                double minval = double.MaxValue;
+                int desidx = 0;
+                int cnt = 1;
+                foreach (var node in nodesByDes)
+                {
+                    if (Math.Abs(param - node.GetAverage()) < minval)
+                    {
+                        minval = Math.Abs(param - node.GetAverage());
+                        desidx = cnt;
+                    }                    
+                    cnt++;
+                }
+                desIndexes[i] = i;
+            }
+            // ищем наиболее часто встречающееся
+            var most = desIndexes.GroupBy(x => x).OrderByDescending(x => x.Count()).First();
+            if (most.Count() == 1)
+                return DeseaseType.dtUnknown;
+
+            return (DeseaseType) most.Key;
         }
 
         void ResizeBounds()
@@ -110,9 +179,22 @@ namespace CoreData
             BestB = 0.0;
             BestC = 0.0;
 
-            //CurveFunctions.FindGoodFit(spmVals, out BestA, out BestB, out BestC, 10, 100);
-            //var f = new DoubleParameterizedDelegate(AnalysisFunctions.ThreeParameterExponential);
-            q = BestB;
+            var f = new DoubleParameterizedDelegate(AnalysisFunctions.ThreeParameterExponential);
+            var fitter = new OneVariableFunctionFitter<TrustRegionMinimizer>(f);
+
+            var lvect = new DoubleVector();
+            var kvect = new DoubleVector();
+            foreach (var pt in spmVals)
+            {
+                lvect.Append(pt.X);
+                kvect.Append(pt.Y);
+            }
+            var start = new DoubleVector(0.1, 0.1, 0.1);
+            DoubleVector solution = fitter.Fit(lvect, kvect, start);
+            BestA = solution[0];
+            BestB = solution[1];
+            BestC = solution[2];
+            q = BestA;
             return true;
         }
         private bool CalcTC()
@@ -121,12 +203,16 @@ namespace CoreData
             
             foreach (var pt in spmVals)
             {
-                //double l = pt.X;
-                //double Ke = pt.Y;
-                //double Kr = BestA + BestB*Math.Exp(BestC*l);
-                //tc = tc + Math.Abs((Ke - Kr)/Ke)*100;
-                tc = 50;
+                double l = pt.X;
+                double Ke = pt.Y;
+                double Kr = BestC + BestA * Math.Exp(BestB * l);
+                if (Ke == 0)
+                {
+                    continue;
+                }
+                tc = tc + Math.Abs((Ke - Kr) / Ke);                
             }
+            tc = tc*100;
             return true;
         }
         private bool CalcISO()
@@ -144,14 +230,17 @@ namespace CoreData
             return true;
         }
 
-        public bool LoadDataFromCsv(string filename)
+        public bool LoadDataFromCsv(string filename, bool doReadDesease = true)
         {
             spmVals.Clear();
             using (var reader = new StreamReader(File.OpenRead(filename)))
             {
                 // болезнь
-                var desStr = reader.ReadLine();
-                currentDes = (DeseaseType) Convert.ToInt32(desStr);
+                if (doReadDesease)
+                {
+                    var desStr = reader.ReadLine();
+                    currentDes = (DeseaseType)Convert.ToInt32(desStr);
+                }                
 
                 while (!reader.EndOfStream)
                 {

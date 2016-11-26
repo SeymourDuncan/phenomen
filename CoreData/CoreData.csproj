@@ -44,9 +44,9 @@
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="NMathKernelx64, Version=6.2.0.13, Culture=neutral, PublicKeyToken=873235918a322639, processorArchitecture=AMD64">
+    <Reference Include="NMathPremium, Version=6.2.0.13, Culture=neutral, PublicKeyToken=873235918a322639, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\refs\x64\NMathKernelx64.dll</HintPath>
+      <HintPath>..\refs\Assemblies\NMathPremium.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
